@@ -1,0 +1,14 @@
+tr.alt td {
+	background :#D0D0D0;
+}
+
+#template-results-buttonsl ul, li {
+    list-style-type: none;
+	padding-left: 0px;
+}
+
+/* TO DO	 hacked in to make the template buttons sit right - target properly */
+ul, li {	 
+	list-style:none;
+	padding-left: 0px;
+}

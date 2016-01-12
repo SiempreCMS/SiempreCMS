@@ -1,0 +1,967 @@
+/* CSS FROM JSTREE - TO BE REVIEWED */
+html, body { 
+	background:#ebebeb; 
+	font-size: 13px;
+	font-family: 'Segoe UI Light_', 'Open Sans Light', Verdana, Arial, Helvetica, sans-serif;
+	margin:0; 
+	padding:0; 
+}
+
+.treecontainer { 
+	/* width: 20%;
+	min-width: 280px;   originally 320px*/
+	background: white; 
+	border-radius: 0px; 
+	margin: 0px auto 0 auto; 
+	min-height: 960px;
+	padding: 0px; 
+	position: absolute;
+	/* float: left; */
+	width: 100%;	
+	z-index: 99;
+}
+
+.edit-panel {
+	display: none;
+}
+
+.user-panel {
+	display: block;
+}
+
+#user-results {
+	overflow: auto;
+}
+
+#tree { 
+/*	min-width:289px;   originally 319px*/
+	overflow: auto; 
+	padding: 10px 0;
+	width: 100%;
+}
+
+#tree-showhide-bar {
+	background-color: #005374;
+	border-radius: 2px;
+	position: fixed;
+	right: 0;
+	height: 20%;
+	top: 40%;
+	width: 7px;
+	z-index: 100;
+}
+
+#tree-showhide {
+	background: #005374 url('/admin/css/images/right-arrow.svg') no-repeat center 50%;
+	border-radius: 5px;
+	cursor: pointer;
+	height: 50px;
+	margin: 0; 
+	position: relative;
+	overflow: hidden;
+	right: 15px;
+	top: 32%;
+	width: 18px;
+	z-index: 101;	
+}
+
+#tree-showhide.left {
+	background-image: url('/admin/css/images/left-arrow.svg');
+	right: none;
+	left: 5px;
+}
+
+#tree-showhide-bar.left {
+	left: 0;
+	right: none;
+}
+/* fix for stupidly long node names (to review) */
+.jstree-default a { 
+    white-space:normal !important; height: auto; 
+}
+.jstree-anchor {
+    height: auto !important;
+}
+.jstree-default li > ins { 
+    vertical-align:top; 
+}
+.jstree-leaf {
+    height: auto;
+}
+.jstree-leaf a{
+    height: auto !important;
+}
+
+.jstree-ocl {
+	width: 30px; /* better for mobiles */
+}
+
+.jstree-default .jstree-themeicon {
+    background-position: -100px -68px;
+}
+
+#data { /* margin-left:320px; */ }
+#data textarea { margin:0; padding:0; height:100%; width:100%; border:0; background:white; display:block; line-height:18px; }
+#data, #code { font: normal normal normal 12px/18px 'Consolas', monospace !important; }
+/* CSS FROM JSTREE - TO BE REVIEWED */
+
+.main {
+/*	min-width: 1350px; */
+	width: 100%;
+}
+
+select {
+	vertical-align: top;
+	display: inline-block;
+	height: 33px;
+	padding: 6px 6px;
+	margin-bottom: 9px;
+	margin-top: 0;
+	font-size: 14px;
+	line-height: 20px;
+	color: #333;
+	background-color: #fff;
+	border: 1px solid #A9A9A9;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+	border-radius: 0;
+}
+
+option {
+	display: block;
+	padding: 0px 2px 1px;
+	white-space: pre;
+	min-height: 1.2em;
+}
+
+iframe {
+	width: 100%;
+	height: 800px;
+}
+
+.note {
+	font-style: italic;
+}
+
+.warning {
+	color: red;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+    clip: rect(1px, 1px, 1px, 1px);
+    padding:0 !important;
+    border:0 !important;
+    height: 1px !important;
+    width: 1px !important;
+    overflow: hidden;	
+}
+
+.menu-container {
+	background: url("images/menu_background.png") repeat-x scroll 50% 50% transparent;
+	border-bottom: 0.15em dotted #000000;
+	display: block;
+	left: 0px;
+	min-height: 32px;
+/* 	min-width: 1350px;  temp hack b4 responsive */
+	padding: 10px 0 5px 0;
+	position: fixed;
+	top: 0px;	
+	width: 100%;
+	z-index: 99;
+}
+
+nav{
+	color: #111;
+	float: left;
+	text-align: center;
+	width: 50%;
+}
+
+nav ul{
+    display: none;
+}
+
+nav ul li{
+	background: #852b99;
+	border: 1px transparent solid;
+	color: #eeeeee !important;
+	border-radius: 0;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 14px;
+	line-height: 16px;	
+	list-style: none;
+	margin: auto 5px;
+	outline: none;
+	padding: 11px 19px;
+	text-align: center;
+	text-decoration: none;
+	vertical-align: middle;
+}
+
+nav ul li a{
+    text-decoration: none;
+    color:#fff;
+}
+
+nav span.mobile {
+	display: none;
+	font-size: 26px;
+    margin-right: 2%;
+}
+
+nav ul li span {
+	font-size: 18px;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+nav ul li img{
+	height: 20px;
+    vertical-align: middle;
+	width: 20px;
+}
+nav ul li:hover{
+    background: #6d1b81;
+}
+
+nav ul li a:hover{
+    color: #ababab;
+}
+
+nav ul li a.current{
+    text-decoration:underline;
+}
+
+/*
+nav ul li:first-child {
+    text-align: left;
+    padding-left: 10px;
+} */
+
+nav ul li.active a {
+	color: #B5B1EC;
+}
+
+.menulogo {
+	float: left;
+	padding: 2px 20px 0 0;
+	font-size: 9px;
+	color: #A9B3BC;
+	width: 15%;
+} 
+
+.menulogo span {
+	position: absolute;
+	top: 26px;
+	margin-left: 10px;
+}
+
+.menulogo  a{
+	color: white;
+}
+
+.menulogo  img{
+	height: 40px;
+	width: auto;
+}
+.menuspacer
+{
+	height:60px;
+}
+
+.panel {
+	width: 100%;
+}
+
+.button {
+	background-color: #4d90fe;
+	border: 1px transparent solid;
+	color: #eeeeee !important;
+	border-radius: 0;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 14px;
+	line-height: 16px;	
+	margin: auto 10px;
+	outline: none;
+	padding: 11px 19px;
+	text-align: center;
+	text-decoration: none;
+	vertical-align: middle;
+}
+
+.button:hover {
+	background-color: #0072bb;
+}
+
+.green {
+	background: #35aa47;
+}
+
+.green:hover {
+	background: #1d943b;
+}
+
+.black {
+	background: #555;
+}
+
+.black:hover {
+	background: #222;
+}
+
+.purple {
+	background: #852b99;
+}
+
+.purple:hover {
+	background: #6d1b81;
+}
+.red {
+	background: #d84a38;
+}
+.red:hover {
+	background: #c53727;
+}
+
+.disabled {
+	background: #fff;
+	color: #eeeeee;
+}
+
+.edit-menu {
+	height:45px; 
+	padding-top: 5px;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+	background-repeat: no-repeat;
+	display: inline-block;	
+	height: 16px;
+	line-height: 14px;
+	margin-top: 0;
+	padding-right: 5px;
+	vertical-align: top;
+	width: 16px;
+}
+
+.icon-save {
+	background-image: url('images/icon-save.png');
+}
+
+.icon-publish {
+	background-image: url('images/icon-publish.png');
+}
+
+.icon-add {
+	background-image: url('images/icon-add.png');
+}
+
+.icon-edit {
+	background-image: url('images/icon-edit.png');
+}
+
+.icon-password {
+	background-image: url('images/icon-password.png');
+}
+
+.icon-search {
+	background-image: url('images/icon-search.png');
+}
+
+.icon-action {
+	background-image: url('images/icon-action.png');
+}
+
+.icon-delete {
+	background-image: url('images/icon-delete.png');
+}
+
+.icon-left {
+	background-image: url('images/icon-left.png');
+}
+
+.icon-right {
+	background-image: url('images/icon-right.png');
+}
+
+.tab_content {
+	min-height: 400px;
+	/* overflow: auto; */
+}
+
+.node-details {
+	border: none;
+	font-size: 14px !important; /* sigh - jquery ui owns all the things */
+	padding-top: 10px;
+}
+
+.node-notes {
+	font-size: 14px !important; /* sigh - jquery ui owns all the things */
+}
+
+.entity {
+	border-bottom: 2px solid #CACACA;
+	height: auto;
+	margin-bottom: 10px;
+	padding: 5px 0;
+	 overflow: auto;
+	width: 100%;
+}
+
+.entity-info {
+	float: left;
+	width: 100%;
+}
+
+.entity-data {
+	float: left;
+	width: 100%;
+}
+
+.entity-data label {
+	float: left;
+	width: 10em;
+	margin: 0 1em 1em 0;
+}
+
+.entity-data input {
+	margin-bottom: 1em;
+}
+
+.entity-data textarea {
+	max-width: 100%;
+	
+}
+.content-nocache-bool {
+	display: none;
+}
+.fileupload {
+	padding: 10px 0;
+}
+
+.media-folders-container {
+	background: #F5F5F5;
+	width: 100%;
+}
+
+.media-folders {
+	float: left;
+	margin: 0 auto;
+	padding: 5px;
+}
+
+.media-folders ul li {
+    display: inline-block;
+	margin-right: 15px;
+	padding: 10px;
+}
+
+.media-folders ul li:hover {
+	-moz-box-shadow: 0 0 10px #ccc; 
+	-webkit-box-shadow: 0 0 10px #ccc; 
+	box-shadow: 0 0 10px #ccc;
+}
+
+.media-folders ul li span {
+    font-size: 12px;
+    font-family: "Book Antiqua", "Palatino Linotype", Georgia, serif;
+    letter-spacing: 0.1em;
+    clear:both;
+    display:block
+}
+
+.media-folders ul li img{
+    vertical-align: top;
+}
+
+.media-file {
+	border: 2px #AEAEFB solid;
+	float: left;
+	height: 250px;
+	margin: 5px;
+	max-width: 300px;
+	padding: 0 10px 10px 0;
+}
+
+.media-file img {
+	display: block;
+	margin: 0 auto;
+	max-height: 300px;
+	max-width: 300px;
+}
+
+.media-file img:hover {
+	-moz-box-shadow: 0 0 10px #ccc; 
+	-webkit-box-shadow: 0 0 10px #ccc; 
+	box-shadow: 0 0 10px #ccc;
+}
+
+.media-file p {
+	font-size: 10px;
+}
+
+.media-preview {
+	padding: 20px;
+	max-height: 200px;
+	max-width: 200px;
+}
+
+.upload input {
+	display: none;
+}
+
+.status {
+	display: none;
+	padding: 5px;
+	background: #F47063;
+	width: 100%;
+	color: white;
+	margin: 8px 0;
+}
+
+.progress {
+	position: relative;
+	width: 90%;
+	margin: 10px auto;
+	border: 1px solid #DDD;
+	padding: 5px;
+	border-radius: 3px;
+}
+
+.bar {
+	background: #008DE6;
+	height: 20px;
+	width: 0%;
+	-webkit-transition: width .3s;
+	-moz-transition: width .3s;
+	transition: width .3s;
+}
+
+.percent {
+	position: absolute;
+	display: inline-block;
+	top: 6px;
+	left: 48%;
+	color: #333;
+}
+
+.pure-button {
+	display: inline-block;
+	zoom: 1;
+	line-height: normal;
+	white-space: nowrap;
+	vertical-align: baseline;
+	text-align: center;
+	cursor: pointer;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+
+.page-path-container {
+	background: #F8F8F8;
+	border: 2px #CDCDCD solid;
+	padding: 20px 10px;
+}
+
+.content-pagepaths {
+	width: 400px;
+}
+
+.content-pagepaths li {
+	min-height: 45px;
+}
+
+.content-pagepath-delete {
+	float: right;
+}
+
+.pagepath {
+	width: 100%;
+	padding: 5px 5px;
+	margin: 10px 0;
+}
+
+div.section {
+	border: 3px solid #CFF6CF;
+	padding: 5px;
+	background: #F1FFF1;
+}
+
+div.sectioninst {
+	border: 2px solid #B0AEC9;
+	padding: 5px;
+	margin-bottom: 25px;
+	background: #F1F1FF;
+}
+
+div.section-buttons {
+	border-top: 1px blue dashed;
+	padding-top: 5px;
+}
+
+div.sectioninst_fields {
+}
+
+div.sectioninst_fields_peek {
+	max-height: 200px;
+	overflow: hidden;
+}
+
+
+div.sectioninst-create {
+	text-align: center;
+}
+
+.ui-dialog {
+top: 0; left: 0;
+}
+/* move to content.css? */
+.entity-number {
+	min-width: 100px;
+	width: 25%;
+}
+
+.entity-shorttext {
+	width: 98%;
+}
+.entity-longtext, .entity-nodepicker {
+	width: 98%;
+	height: 140px;
+}
+
+.entity-nodepicker {
+	display: none;
+}
+
+.stripes tr:hover {
+	background: #666;
+	color: white;
+	cursor: pointer;
+}
+
+.alt {
+	background: #C1C1C1;
+}
+
+.template-list {
+	list-style: none;
+	padding-left: 3%;
+}
+
+.template-list li {
+	padding-top: 8px;
+}
+
+.templatelisthead {
+	padding-left: 10px;
+}
+
+/* Node picker classes */ 
+.entity-longtext {
+	width: 98%;
+	height: 140px;
+}
+
+div.np-node, div.np-node-button {
+	clear: both;
+	height: 24px;
+}
+
+div.np-node span {
+	float: left;
+	padding-top: 5px;
+	margin-top: -2px;
+}
+
+.np-node-button a {
+	float: left;
+	font-size: 0.8em;
+}
+
+.np-node-button a span{
+	display: inline-block;
+	float: left;
+}
+div.np-node-buttons {
+	padding-left: 10px;
+	padding-top: 4px;
+}
+
+.np-node-buttons a {
+    float: left;
+}
+
+div.node span {
+	float: left;
+}
+.np-node-buttons {
+	float: left;
+}
+div.level-1 {
+	padding-left: 0px;
+}
+
+div.level-2 {
+	padding-left: 50px;
+}
+
+div.level-3 {
+	padding-left: 100px;
+}
+
+div.level-4 {
+	padding-left: 150px;
+}
+
+div.level-5 {
+	padding-left: 200px;
+}
+
+/* legacy user screen fixes */
+
+.twocol-contentA input {
+    width: 90%;
+}
+
+div.linkpicker input{
+	width: 50%;
+}
+/* EOF Node picker classes */ 
+/* ==========================================================================
+   Helper classes
+   ========================================================================== */
+
+/*
+ * Image replacement
+ */
+
+.ir {
+    background-color: transparent;
+    border: 0;
+    overflow: hidden;
+    /* IE 6/7 fallback */
+    *text-indent: -9999px;
+}
+
+.ir:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 150%;
+}
+
+/*
+ * Hide from both screenreaders and browsers: h5bp.com/u
+ */
+
+.hidden {
+    display: none !important;
+    visibility: hidden;
+}
+
+/*
+ * Hide only visually, but have it available for screenreaders: h5bp.com/v
+ */
+
+.visuallyhidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+/*
+ * Extends the .visuallyhidden class to allow the element to be focusable
+ * when navigated to via the keyboard: h5bp.com/p
+ */
+
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+    clip: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    position: static;
+    width: auto;
+}
+
+/*
+ * Hide visually and from screenreaders, but maintain layout
+ */
+
+.invisible {
+    visibility: hidden;
+}
+
+/*
+ * Clearfix: contain floats
+ *
+ * For modern browsers
+ * 1. The space content is one way to avoid an Opera bug when the
+ *    `contenteditable` attribute is included anywhere else in the document.
+ *    Otherwise it causes space to appear at the top and bottom of elements
+ *    that receive the `clearfix` class.
+ * 2. The use of `table` rather than `block` is only necessary if using
+ *    `:before` to contain the top-margins of child elements.
+ */
+
+.clearfix:before,
+.clearfix:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+/*
+ * For IE 6/7 only
+ * Include this rule to trigger hasLayout and contain floats.
+ */
+
+.clearfix {
+    *zoom: 1;
+}
+
+/* css for timepicker */
+.ui-timepicker-div .ui-widget-header { margin-bottom: 8px; }
+.ui-timepicker-div dl { text-align: left; }
+.ui-timepicker-div dl dt { float: left; clear:left; padding: 0 0 0 5px; }
+.ui-timepicker-div dl dd { margin: 0 10px 10px 45%; }
+.ui-timepicker-div td { font-size: 90%; }
+.ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
+
+.ui-timepicker-rtl{ direction: rtl; }
+.ui-timepicker-rtl dl { text-align: right; padding: 0 5px 0 0; }
+.ui-timepicker-rtl dl dt{ float: right; clear: right; }
+.ui-timepicker-rtl dl dd { margin: 0 45% 10px 10px; }
+
+.login-banner {
+	padding: 5% 0 4% 0;
+	text-align: center;
+}
+
+form.login-form  {
+	background: #fff;
+	overflow: hidden;
+	padding: 2%;
+	margin: 0 auto;
+	min-width: 400px;
+	width: 27%;
+}
+
+form.login-form div {
+	padding: 2% 3% ;
+}
+
+.form-row label, .form-row legend {
+	float: left;
+	padding-right: 2%;
+	width: 20%;
+}
+
+.form-row input {
+	float: right;
+	font-size: 18px;
+	height: 20px;
+	width: 40%;
+}
+
+.form-row-centered {
+	margin: 0 auto;
+	width: 250px;
+}
+
+.form-row-centered input{
+	width: 100%;
+}
+
+.no-close .ui-dialog-titlebar-close {
+    display: none;
+}
+
+@media only screen and (min-width: 450px) {
+	nav span.mobile {
+		display: inline;
+	}
+}
+
+@media only screen and (min-width: 1024px) {
+
+	nav{
+		width: 80%;
+	}
+	
+	nav ul{
+		display: table-row;
+	}
+	
+	nav span.mobile, nav select {
+	   display: none;
+	}
+
+	.treecontainer { 
+		float: left;
+		position: static;
+		width: 20%;
+	}
+
+	.edit-panel {
+		display: block;
+	}
+	
+	#tree { 
+		border-right: 1px solid silver; 
+	}
+	
+	.panel {
+		padding: 10px;
+		float: left;
+		width: 77%;
+	}
+	
+	#tree-showhide, #tree-showhide-bar {
+		display:none;
+	}
+
+	.entity-info {
+		width: 20%;
+	}	
+	
+	
+	.entity-data {
+		width: 80%;
+	}
+	
+	#user-search-panel {
+		float:left;
+		margin-right:20px;
+		width:400px;
+		border-right: .15em dotted #9669FE;
+	}
+
+	#user-search-id {
+		float:left;
+		margin-right:20px;
+	}
+}
+
+@media only screen and (min-width: 1366px) {
+	
+	nav ul li {	
+	    margin: auto 10px;
+	}
+}
