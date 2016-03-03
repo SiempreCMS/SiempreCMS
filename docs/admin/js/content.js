@@ -234,6 +234,8 @@ function showLinkPickerNodePickerDialog() {
 					}
 						
 					$("#nodepicker-dialog").dialog('close');
+					
+					
 				}
 			})
 		})
@@ -258,45 +260,6 @@ function showLinkPickerNodePickerDialog() {
 }
 	
 
-function showImagePickerDialog(editor) {
-	//editor.insertContent('<atest');
-	$("#imagepicker-dialog").dialog({
-		closeOnEscape: true,
-		draggable: true,
-		modal: true,
-		resizable: true,
-		width: 1000,
-		height: 800,
-		buttons: {
-				Insert: function() {
-					var alt = $('#imagepicker-alttext').val(); 
-					var classStr = $('#imagepicker-target').val() == "none" ? '' : $('#imagepicker-target').val();
-					// var target = $('#imagepicker-target').val() == 'new'  ? '_blank' : '_self';
-					if(classStr == '')
-					{
-						editor.insertContent('<img src="' + $('#imagepicker-url').val() + '"' + ' alt="' + alt + '"/>');
-					}
-					else {
-						editor.insertContent('<img src="' + $('#imagepicker-url').val() + '"' + ' alt="' + alt + '"' + ' class="' + classStr + '"/>');
-					}
-					
-					$( this ).dialog( "close" );
-				},			
-				Cancel: function() {
-					$( this ).dialog( "close" );
-				}
-		}
-	});
-}	
-
-	
-function showImagePickerMediaPickerDialog() {
-	event.preventDefault ? event.preventDefault() : event.returnValue = false;
-	// get the section ID & set the global var
-	mediaPickerTarget = 'imagepicker-url';
-	showMediaPickerDialog();
-}
-	
 
 function getMedia(path) {
 	// first empty the folders and files divs
@@ -785,7 +748,7 @@ function loadContentNode(nodeID) {
 								
 								// check if we need to set the checkbox
 								if(value['entity_type'] == 8) {
-								//	console.log("SECTION: #entity_" + value['entityID'] + '_bool');
+									console.log("SECTION: #entity_" + value['entityID'] + '_bool');
 									// we also need to set the hidden text box to "true" or "false"
 									if(value['value'] == '1') {
 										$("#entitysecinst_" + value['entityID'] + "_" + value['sectionInstanceID'] + '_checkbox').prop('checked', 'checked');
@@ -801,7 +764,7 @@ function loadContentNode(nodeID) {
 								
 								// check if we need to set the checkbox
 								if(value['entity_type'] == 8) {
-							//		console.log("#entity_" + value['entityID'] + '_bool');
+									console.log("#entity_" + value['entityID'] + '_bool');
 									if(value['value'] == '1') {
 										$("#entity_" + value['entityID'] + '_checkbox').prop('checked', true);
 										// we also need to set the hidden text box to "true"
@@ -1404,10 +1367,10 @@ function setupTinyMCE(selector) {
 			menubar: false,
 			relative_urls : false,
 			selector   : selectorStr,
-			plugins: "link,code,paste,linkpicker,imagepicker",
+			plugins: "link,code,paste,linkpicker",
 			paste_as_text: true,
 			paste_remove_styles: true,
-			toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | code | removeformat | linkpicker | imagepicker"
+			toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | code | removeformat | linkpicker"
 		});
 	});
 	var currentdate = new Date();
@@ -1507,7 +1470,7 @@ function resetNpNodeTreeButtons(treeRoot)
 	
 	// traverse tree and disable buttons
 	treeRoot.find('div.np-node').each(function () {
-	//	console.log($(this).children('span').html());
+		console.log($(this).children('span').html());
 		// if we're at level one no adult
 		var level = $(this).data('level');
 		if(level == 1) {
@@ -1939,11 +1902,6 @@ $(document).ready(function() {
 		showLinkPickerNodePickerDialog();
 	});	
 
-	// Image Picker - Media Picker  
-	$("#imagepicker-select").click(function() {
-		event.preventDefault ? event.preventDefault() : event.returnValue = false;
-		showImagePickerMediaPickerDialog();
-	});	
 	
 	// set checkbox 
 	$("#contentcontainer").on('click', '.entity-checkbox', function() {
