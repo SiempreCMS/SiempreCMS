@@ -796,6 +796,30 @@ function removeTabs() {
 		
 // MAIN DOC READY JQUERY
 $(document).ready(function() {  
+
+	var wasMobile = false;
+	if ($(window).width() <= 1024) {
+		wasMobile = true;
+	}
+	
+	$(window).resize(function() {
+		if ($(window).width() <= 1024 && !wasMobile) {
+			$('#templatelist').show();
+			$('#edit-panel').hide();
+			$('#tree-showhide').removeClass('left');
+			$('#tree-showhide-bar').removeClass('left');
+			wasMobile = true;
+		}
+		else 
+		{
+			if($(window).width() > 1024 && wasMobile)
+			{
+				$('#templatelist').show();
+				$('#edit-panel').show();
+				wasMobile = false;
+			}
+		}
+	});
 	
 	$("nav select").change(function() {
 	  window.location = $(this).find("option:selected").val();
