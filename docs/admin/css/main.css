@@ -731,7 +731,7 @@ div.level-5 {
     width: 90%;
 }
 
-div.linkpicker input{
+div.linkpicker input, div.imagepicker input{
 	width: 50%;
 }
 /* EOF Node picker classes */ 

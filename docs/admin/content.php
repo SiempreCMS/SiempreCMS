@@ -206,7 +206,7 @@ if(isset($_GET['operation'])) {
 		<!-- Start of Node Picker Dialog -->  
 		<div id="linkpicker-dialog" class="linkpicker" title="Siempre CMS - Enter a link" style="display: none;"> 	
 			<h2>Select a link!</h2>
-			<p>EIther, manually enter a URL or select a content node, and provide the text for the link</p>
+			<p>Either, manually enter a URL or select a content node, and provide the text for the link</p>
 			<p>URL:</p>
 			<input type="text" id="linkpicker-url" />
 			<a href="#" class="button green" id="linkpicker-select"><span class="icon-action"></span> Select a content node</a>
@@ -223,6 +223,27 @@ if(isset($_GET['operation'])) {
 			</div>
 		</div>  
 		<!-- End of Node Picker Dialog --> 
+		
+		<!-- Start of Image Picker Dialog -->  
+		<div id="imagepicker-dialog" class="imagepicker" title="Siempre CMS - Select an image" style="display: none;"> 	
+			<h2>Select a image!</h2>
+			<p>Select an image and (optionally) a class</p>
+			<p>Image URL:</p>
+			<input type="text" id="imagepicker-url" />
+			<a href="#" class="button green" id="imagepicker-select"><span class="icon-action"></span> Select an image</a>
+			<p>Image Alt Text</p>
+			<input type="text" id="imagepicker-alttext" />
+			<p>Class:</p>
+			<select id="imagepicker-target">
+				<option value="none">None</option>
+				<option value="img-left">Left</option>
+				<option value="img-right">Right</option>
+				<option value="img-center">Center</option>
+			</select>
+			</div>
+		</div>  
+		<!-- End of Image Picker Dialog --> 
+		
 		
 		<!-- Start of Page Paths Dialog -->  
 		<div id="pagepaths-dialog" title="Siempre CMS - Edit Page Paths" style="display: none;" class="help"> 	
