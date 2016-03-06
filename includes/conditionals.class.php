@@ -49,11 +49,11 @@ class Conditional {
 			$this->operandRightIsCompound = true;
 		}
 		
-	//	echo "<p>******************</p>";
-	//	echo "<p>$this->conditionalStr</p>";
-	//	echo "<p>LEFT:*" . $this->operandLeft . "* - Compound: " . $this->operandLeftIsCompound. "</p>";
-	//	echo "<p>OPERATOR:*" . $this->operator ."*</p>";
-	//	echo "<p>RIGHT:*" .  $this->operandRight . "* - Compound: " . $this->operandRightIsCompound. "</p>";
+	/*	echo "<p>******************</p>";
+		echo "<p>$this->conditionalStr</p>";
+		echo "<p>LEFT:*" . $this->operandLeft . "* - Compound: " . $this->operandLeftIsCompound. "</p>";
+		echo "<p>OPERATOR:*" . $this->operator ."*</p>";
+		echo "<p>RIGHT:*" .  $this->operandRight . "* - Compound: " . $this->operandRightIsCompound. "</p>"; */
 
 		
 		// if we have a compound then evaluate this by creating a new child instance of this class
@@ -139,6 +139,10 @@ class Conditional {
 			$startPos = $curCharPos;
 		}
 		
+		// we check at the end peeking forward if there is another operator (e.g. a compound)
+		$foundAnotherOperator = false;
+		$peekCharPos = 0;
+		
 		while($curCharPos < $this->conditionalStrLen) {
 			$curChar = $this->conditionalArray[$curCharPos];
 		//	  echo "<p>" . $curCharPos . " - " .$curChar . "</p>";
@@ -208,15 +212,50 @@ class Conditional {
 				continue;
 			}
 			
+			// if we've found an operator ...
 			if($curChar == "=" || $curChar == "!" || $curChar == ">" || $curChar == "<" || $curChar == "&" || $curChar == "|") {
-				$endPos = $curCharPos;
+				// first check that there isn't another operator (if there is then we have something like a == b && c == d)
+				// we had a bug where the left was a and the right was b && c == d 
+				// when we should have had a compound on the left first . 
+				$peekCharPos = $curCharPos + 2; // +2 to move past the operator
+				while($peekCharPos < $this->conditionalStrLen) 
+				{
+					$curPeekChar = $this->conditionalArray[$peekCharPos];
+					
+					if($curPeekChar == "&" || $curPeekChar == "|")
+					{ 
+						$isCompound = true;
+						$endPos = $peekCharPos;
+						$foundAnotherOperator = true;
+						break;
+					}
+					// TODO - not sure about this bit of logic - I think I should break  out here with a false... to test
+					if($curPeekChar == ")" || $curPeekChar == "(")
+					{
+						break;
+					}
+					
+					$peekCharPos++;
+				}  
+				if(!$foundAnotherOperator)
+				{
+					$endPos = $curCharPos;
+				}
 				break;
 			}
 				
 			$curCharPos += 1;
 		}
-		$endPos = $curCharPos;
-		$this->nextPos = $curCharPos;
+		if($foundAnotherOperator)
+		{
+			$endPos = $peekCharPos;
+			$this->nextPos = $peekCharPos;
+		}
+		else 
+		{
+			$endPos = $curCharPos;
+			$this->nextPos = $curCharPos;
+		}
 		
 		if ($openBracket) {
 			$operand = trim(substr($this->conditionalStr, $startPos+1, $endPos - $startPos - 2)); // strip brackets
