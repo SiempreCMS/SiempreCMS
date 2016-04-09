@@ -122,7 +122,14 @@ class vercheck {
 				$query->execute();
 			}
 			
-		
+			if($dbVersion < "1.3.5")
+			{
+				error_log("PERFORMING DB UPGRADE TO 1.3.5");
+				// update version table
+				$sql = "UPDATE `cms_version` SET `version`= '1.3.5';";
+				$query = self::$db->prepare($sql);
+				$query->execute();
+			}		
 		} 
 		catch (PDOException $e)
 		{
