@@ -1109,6 +1109,11 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 				$result = $query->fetch();
 				return strtolower($result['path'] . '/' . $nodeName);
 			}
+			else 
+			{
+				// this is a root level node so just return the node name?
+				return strtolower('/' . $nodeName);
+			}
 		} 
 		
 		return '';
