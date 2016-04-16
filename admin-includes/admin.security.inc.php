@@ -14,7 +14,7 @@ session_start();
 
 // if the session is not set and we're not on a safe page
 $page = basename($_SERVER["REQUEST_URI"]);
-if(!isset($_SESSION['userID']) && !in_array($page, $safePages)) {
+if(!isset($_SESSION['userID']) && !in_array($page, $redirectWhiteList)) {
 	// I'm destroying the session here... to fix validation on join (?) I'm not sure I should. 
 	session_destroy();
 	header('Location: login.php?msg=requires_login&loc='.urlencode(basename($_SERVER['REQUEST_URI'])));

@@ -18,7 +18,7 @@
 	define('DBVERSION', $vercheck->getDBVersion());
 	
 	// File version number
-	define('FILEVERSION', '1.3.5');
+	define('FILEVERSION', '1.3.6');
 	
 	// if not equal - redirect to upgrade page?
 	// TO DO for now just shows an error - upgrading is not yet automated

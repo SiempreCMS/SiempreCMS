@@ -78,7 +78,7 @@ if (!isset($menu))
 	<div class="menulogo">
 		<a href="http://siempresolutions.co.uk">
 			<img src="images/logo.png" alt="Siempre CMS Logo"/>
-			<span>Siempre CMS v1.3.5</span>
+			<span>Siempre CMS v1.3.6</span>
 		</a>
 	</div>
 </div>
