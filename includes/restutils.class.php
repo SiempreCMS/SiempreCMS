@@ -31,7 +31,16 @@ class RestUtils
 	//		$path = substr($path, 1, strlen($path)-1);
 	//	}
 		// modified to use trim and to strip the first and final /
-		$path = trim($pathURIArray['path'],'/');
+		// isset reqd for www.mydomain.com//news caused error
+		if(isset($pathURIArray['path']))
+		{
+			$path = trim($pathURIArray['path'],'/');
+		}
+		else 
+		{
+			$path = "";
+		}
+
 		
 		$pathArray = explode("/", $path);
 		// error_log(print_r($pathArray,true));	

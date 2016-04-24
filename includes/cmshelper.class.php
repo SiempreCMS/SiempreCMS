@@ -22,6 +22,7 @@ class CMSHelper {
 	// to review
 	public $page;
 	public $pagePath;
+	public $requestVars;
 	public $nodeID;
 	public $fields;
 	public $relatedContent = array();  // TO DO - will these be objects of a page?
@@ -455,7 +456,7 @@ class CMSHelper {
 	}  
 	
 	
-	function getPage($pathArray) 
+	function getPage($pathArray, $requestVars) 
   	{
 		// Get the Page 
 		// TO DO this will be if the cache is non-existent / dirty
@@ -490,6 +491,7 @@ class CMSHelper {
 		*/
 		$this->languageID = 1;
 		$this->languageMatch = FALSE;
+		$this->requestVars = $requestVars;  // copy the url variables for use in pagination etc.
 			
 		// Get page node ID
 	//	$this->nodeID = $this->getPageNodeID($pathArray);
@@ -552,7 +554,6 @@ class CMSHelper {
 				// then TO DO - 404?
 				throw new Exception('No matching page in the database for node ID: ' . $this->nodeID . " - from page path : " . print_r($pathArray, true)); 
 				return false;
-				
 			}
 		}
 		catch (PDOException $e)
@@ -999,13 +1000,6 @@ class CMSHelper {
 		// seems strange to have both relatedNodes and relatedContent. Main diff is that relatedContent's index is the nodeID. 
 		// TODO - perhaps this could be consolidated into a single struc for efficiency. 
 		
-	//	$relatedNodesStr = '';
-	//	foreach($relatedNodes as $node) {
-	//		$relatedNodesStr .= ',' . $node['nodeID'];
-	//	}
-		// now delete the first comma
-	//	$relatedNodesStr = substr($relatedNodesStr, 1, strlen($relatedNodesStr));
-	//	$this->relatedNodeIDsStr = $relatedNodesStr; // used for page debug
 		$this->relatedNodeIDsStr = implode(',', array_keys($relatedNodes));
 		
 		

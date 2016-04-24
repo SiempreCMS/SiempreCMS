@@ -125,6 +125,23 @@ function showPagePathsDialog() {
 }
 
 
+function showNodeDependenciesDialog() {	
+	$("#node-dependencies-dialog").dialog({
+		closeOnEscape: true,
+		draggable: true,
+		modal: true,
+		resizable: true,
+		width: 800,
+		height: 650,
+		buttons: {
+			Close: function() {
+				$( this ).dialog( "close" );
+			}
+		}
+	});
+}
+
+
 function showMediaPickerDialog() {
 	getMedia("");
 	
@@ -399,7 +416,6 @@ function createMediaFolder() {
 
 
 function showNodePickerDialog() {
-
 	// check if we need to load the tree
 	if(nodePickerTreeInited == false )
 	{
@@ -460,6 +476,69 @@ function showNodePickerDialog() {
 
 					resetNpNodeTreeButtons(nodeTarget.closest('.np-node-tree-root'));
 					encodeNpNodeTree(nodeTarget); 
+				}
+			})
+		})
+	}
+	else {
+		// nothing to do
+	}
+	
+	$("#nodepicker-dialog").dialog({
+		closeOnEscape: true,
+		draggable: true,
+		modal: true,
+		resizable: true,
+		width: 1000,
+		height: 800,
+		buttons: {
+				Close: function() {
+					$( this ).dialog( "close" );
+				}
+		}
+	});
+}
+
+
+function showSimpleNodePickerDialog() {
+	// Simple node picker does mostly the same thing but just returns the node id and name
+	// check if we need to load the tree
+	if(nodePickerTreeInited == false )
+	{
+		$('#nodepicker-tree')
+		.jstree({
+			'contextmenu' : {
+				'select_node' : false
+			},
+			'core' : {
+				'data' : {
+					'url' : '?operation=get_node',
+					'data' : function (node) {
+						return { 'id' : node.id };
+					}
+				},
+				'check_callback' : true,
+				'themes' : {
+					'responsive' : false
+				}
+			},
+			'state' : { 'key' : 'nodepicker'},
+			'plugins' : ['state','dnd','contextmenu','wholerow']
+		})
+		
+		// after the state has loaded THEN we bind on the select o/w the state loading bones it.
+		.on('state_ready.jstree', function (e, data) {
+			nodePickerTreeInited= true;
+			
+			$('#nodepicker-tree').bind('select_node.jstree', function (e, data) {
+				if(data && data.selected && data.selected.length) {		
+					// to do this is a hack as when the tree first loads this is fired on select of the first node. TODO read the api doc and see what event I should hook on
+					var nodePickedID = data.selected[0];  // TO DO review hack to avoid issues with multiselects. 
+					var nodePickedName = data.node.text;
+
+					$(nodeTarget).val(nodePickedName);
+					// can't use .data to update - needs DOM update
+					$(nodeTarget).attr('data-id', nodePickedID);
 				}
 			})
 		})
@@ -818,7 +897,7 @@ function loadContentNode(nodeID) {
 				// Generic node standard info
 				$("#node-id").val(j.results['nodeID']);
 				$("#content-id").val(j.results['contentID']);
-				$("#template-id").val(j.results['templateID']);
+				$("#template-id").val(j.results['templateID'] + " - " + j.results['templateName']);
 				$("#content-created").val(j.results['created']);
 				$("#content-createdBy").val(j.results['createdBy']);
 				$("#content-lastUpdated").val(j.results['lastUpdated']);
@@ -830,7 +909,7 @@ function loadContentNode(nodeID) {
 					$("#content-nocache_checkbox").prop('checked', true);
 				}
 				
-				
+				// Page Paths
 				// for the site setings root node we just hide the page path container
 				if(j.results['nodeID'] == 1) 
 				{
@@ -864,6 +943,12 @@ function loadContentNode(nodeID) {
 									case '3':
 										pathType = '302 Redirect';
 										break;
+									case '100':
+										pathType = 'Wildcard';
+										break;
+									default:
+										pathType = 'Unknown';
+										break;
 								}
 								
 							if(value['type'] == '0') {
@@ -884,9 +969,9 @@ function loadContentNode(nodeID) {
 							}
 							else {
 								// add to the dialog
-								pagepaths.append('<li id="content-pagepath-' + key + '" name="content-pagepath-' + key + '"><a href="/' + value['path'] + '">' + value['path'] + '</a> - ' + pathType + '<a href="#" class="button red content-pagepath-delete" data-id="' + key + '">Delete </a></li>');
+								pagepaths.append('<li id="content-pagepath-' + key + '" name="content-pagepath-' + key + '"><a href="/' + value['path'] + '">' + value['path'] + '</a> - ' + pathType + '<a href="#" class="button red content-pagepath-delete" data-id="' + value['pagepathID'] + '">Delete </a></li>');
 								// and the overview
-								$('#page-path-aliases').append('<li>' + value['path'] + ' type: ' + pathType + '</li>');
+								$('#page-path-aliases').append('<li data-id="' + value['pagepathID'] + '">' + value['path'] + ' type: ' + pathType + '</li>');
 							}
 						});
 					} 
@@ -899,6 +984,57 @@ function loadContentNode(nodeID) {
 						// Get a suggested value to make it easier for editors.
 						getSuggestedPrimaryPagePath();
 					}
+				}
+				
+				// Node Dependencies
+				// for the site setings root node we just hide the node dependency container
+				if(j.results['nodeID'] == 1) 
+				{
+					$('#node-dependencies-container').hide();
+				}
+				else 
+				{
+					// Node dependencies - there can be more than one
+					var nodedependenciesDialog = $("#content-node-dependencies");
+					$('#node-dependencies-container').show();
+					nodedependenciesDialog.empty();
+					
+					$('#node-dependencies').html('');
+					
+					if(j.results['nodedepenencies'].length > 0) {
+						$.each(j.results['nodedepenencies'], function(key, value) {
+							// alert(value.path);
+							// if it's the primary populate that field 
+
+							var dependencyType = '';
+								switch (value['level']) {
+									case null:
+										dependencyType = 'Specific';
+										break;
+									case '-1':
+										dependencyType = 'Wildcard Route';
+										break;
+									case '0':
+										dependencyType = 'All children';
+										break;
+									default:
+										dependencyType = 'Level ' + value['level'];
+										break;
+								}
+								
+							// add to the dialog
+							nodedependenciesDialog.append('<li id="content-pagepath-' + value['nodeDependencyID'] + '" name="content-pagepath-' + value['nodeDependencyID'] + '"><a href="/' + '">' + value['nodeName'] + " (" + value['subnodeID'] + ") " + '</a> - ' + dependencyType + '<a href="#" class="button red content-node-dependency-delete" data-id="' + value['nodeDependencyID'] + '">Delete </a></li>');
+							// and the overview
+							$('#node-dependencies').append('<li data-id="' + value['nodeDependencyID'] + '">' + value['nodeName'] + " (" + value['subnodeID'] + ") " + ' type: ' + dependencyType + '</li>');
+							
+						});
+					} 
+			/*		else 
+					{
+						$("#content-primarypagepath").val('');
+						$("#content-primarypagepath-none").show();
+						$("#page-path").append('<h4>Your page doesn\'t have a Primary Page path so cannot be seen by web visitors yet</h4><p>Set a page path (e.g. a web address) using the "Change" button below.</p>');
+					}  */
 				}
 			}
 			else 
@@ -1082,7 +1218,7 @@ function addNewPagePath() {
 				$("#content-pagepaths").append('<li id="content-pagepath-"' + j.result + ' name="content-pagepath-' + j.result + '"><a href="/' + path + '">' + path + '</a> - ' + pathTypeTxt + '<a href="#" class="button red content-pagepath-delete" data-id="' + j.result.trim() + '">Delete </a></li>');
 				
 				// and the overview
-				$('#page-path-aliases').append('<li>' + path + ' type: ' + pathTypeTxt + '</li>');
+				$('#page-path-aliases').append('<li data-id="' + j.result.trim() + '">' + path + ' type: ' + pathTypeTxt + '</li>');
 				
 				
 			}
@@ -1096,6 +1232,62 @@ function addNewPagePath() {
 	$("#content-primarypagepath-new").val('')
 }
 
+
+function addNewNodeDependency() {
+	var action = 'addNodeDependency';
+	var nodeID = $('#node-id').val();
+	var nodeName = $('#content-node-dependency-new').val();
+	var dependencyID = $('#content-node-dependency-new').data('id');
+	var nodeDependencyLevel = 1;
+	var nodeDependencyLevelText = "1";
+	
+	if($('#content-node-dependency-new-all-children').is(':checked'))
+	{
+		nodeDependencyLevel = 0;
+		nodeDependencyLevelText = "All children";
+	}
+	
+
+	if (dependencyID == '')
+	{
+		alert ("Select a node first");
+		return false;
+	}
+	
+	$.ajaxq("queue", {
+		  url: 'content_ajax.php',
+//		 async: false, 
+		  data: { action: action, 
+			nodeID: nodeID,
+			level: nodeDependencyLevel,
+			dependencyID: dependencyID
+		  },
+		  dataType: 'json',
+		  type: 'POST',
+		  cache: false,
+		  error: function(xhr, textStatus, errorThrown){
+				alert("Error - the server appears to be down - please check your connection and try again: " +textStatus)
+			},
+		  success: function (j) {		  
+			if (j.result !== false) {
+							
+				// add to the dialog
+				$("#content-node-dependencies").append('<li id="content-node-dependency-"' + j.result + ' name="content-node-dependency-' + j.result + '"><a href="/' + nodeName + '">' + nodeName + '</a> - ' + " Level " + nodeDependencyLevelText + '<a href="#" class="button red content-node-dependency-delete" data-id="' + j.result.trim() + '">Delete </a></li>');
+				
+				// and the overview
+				$('#node-dependencies').append('<li data-id="' + j.result.trim() + '">' + nodeName + ' type: ' + " - Level " + nodeDependencyLevelText + '</li>');
+				
+				
+			}
+			else {
+				alert('Error adding node dependency\n\n' + j.msg);
+			}
+		  }
+		});		
+
+	$("#content-node-dependency-new").val('');
+	$("#content-node-dependency-new").attr('data-id', '');
+}
 
 function deletePagePath(ID) {
 	var action = 'deletePagePath';
@@ -1119,6 +1311,33 @@ function deletePagePath(ID) {
 			else {
 				alert('Error deleting page path\n\n' + j.msg);
 				// $("#login-errors").html("<b>Login details incorrect - please try again...<\/b>").show().delay(5000).fadeOut('slow');
+			}
+		  }
+		});		
+	return true;
+}
+
+
+function deleteNodeDependency(ID) {
+	var action = 'deleteNodeDependency';
+	
+	$.ajaxq("queue", {
+		  url: 'content_ajax.php',
+		  data: { action: action, 
+			nodeDependencyID: ID
+		  },
+		  dataType: 'json',
+		  type: 'POST',
+		  cache: false,
+		  error: function(xhr, textStatus, errorThrown){
+				alert("Error - the server appears to be down - please check your connection and try again: " +textStatus)
+			},
+		  success: function (j) {		  
+			if (j.result !== false) {
+				return true;
+			}
+			else {
+				alert('Error deleting node dependency\n\n' + j.msg);
 			}
 		  }
 		});		
@@ -1775,7 +1994,7 @@ $(document).ready(function() {
 		contentChanged = false;
 	});
 	
-	$("#pagepaths").click(function() {
+	$("#pagepaths-change").click(function() {
 		event.preventDefault ? event.preventDefault() : event.returnValue = false;
 		if (contentChanged) {
 			if(!window.confirm('You have unsaved changes - these may be lost if you modify settings in the pagepaths area without first saving your changes - CONTINUE?')) {
@@ -1784,6 +2003,16 @@ $(document).ready(function() {
 		}
 		showPagePathsDialog();
 	});
+	
+	$("#node-dependencies-change").click(function() {
+		event.preventDefault ? event.preventDefault() : event.returnValue = false;
+		if (contentChanged) {
+			if(!window.confirm('You have unsaved changes - these may be lost if you modify settings in the node dependencies area without first saving your changes - CONTINUE?')) {
+				return false;
+			}
+		}
+		showNodeDependenciesDialog();
+	});	
 	
 	$("#language").change(function() {
 	  alert( "Language changed - please click on a node to reload!" );
@@ -1814,8 +2043,33 @@ $(document).ready(function() {
 		pathID = $(this).data('id');
 		if (deletePagePath(pathID)) {
 			$(this).parent('li').remove();
+			$('ul#page-path-aliases').find("li[data-id='"+pathID+"']").remove();
 		}
 	});
+	
+	$('#content-node-dependencies').on('click', 'a.content-node-dependency-delete', function(event) {
+	    event.preventDefault ? event.preventDefault() : event.returnValue = false;
+		nodeDependencyID = $(this).data('id');
+		if (deleteNodeDependency(nodeDependencyID)) {
+			$(this).parent('li').remove();
+			$('ul#node-dependencies').find("li[data-id='"+nodeDependencyID+"']").remove();
+		}
+	});
+	
+	$("#content-node-dependencies-add").click(function() {
+		event.preventDefault ? event.preventDefault() : event.returnValue = false;
+		addNewNodeDependency();
+	});
+	
+	// Node Dependency Link Picker 
+	$("#node-dependency-linkpicker-select").click(function() {
+		event.preventDefault ? event.preventDefault() : event.returnValue = false;
+		// get the div where the node is to be added into a global var
+		
+		// set the nodeTarget as the buttons parent div (node is inserted before)
+		nodeTarget = $('#content-node-dependency-new');
+		showSimpleNodePickerDialog();
+	});	
 	
 	// When page loads...
 	$("#content_tabs_container").tabs({ 

@@ -209,12 +209,14 @@ class content {
 		try {
 			$db =  self::$db;
 			
-			$sql = "SELECT c.`ID`, c.`nodeID`, c.`created`, CONCAT(u1.foreName, ' ',u1.lastName, ' (', u1.ID, ')') AS createdBy, c.`lastUpdated`, CONCAT(u2.foreName, ' ',u2.lastName, ' (', u2.ID, ')') AS lastUpdatedBy, c.`templateID`, IFNULL(c.`notes`, 'No notes') AS notes, c.`version`, c.noCache AS noCache   
+			$sql = "SELECT c.`ID`, c.`nodeID`, c.`created`, CONCAT(u1.foreName, ' ',u1.lastName, ' (', u1.ID, ')') AS createdBy, c.`lastUpdated`, CONCAT(u2.foreName, ' ',u2.lastName, ' (', u2.ID, ')') AS lastUpdatedBy, c.`templateID`, t.name AS templateName, IFNULL(c.`notes`, 'No notes') AS notes, c.`version`, c.noCache AS noCache   
 					FROM cms_content AS c
 					LEFT OUTER JOIN cms_user AS u1 
 						ON c.createdBy = u1.ID
 					LEFT OUTER JOIN cms_user AS u2
 						ON c.lastUpdatedBy = u2.ID
+					INNER JOIN cms_template AS t
+						ON t.ID = c.templateID
 					WHERE nodeID = :nodeID 
 					  AND languageID = :languageID 
 					ORDER BY ID DESC
@@ -233,6 +235,7 @@ class content {
 				$this->results['nodeID'] = $result['nodeID'];
 				$this->results['contentID'] = $result['ID'];
 				$this->results['templateID'] = $result['templateID'];
+				$this->results['templateName'] = $result['templateName'];
 				$this->results['notes'] = $result['notes'];
 				$contentID = $result['ID'];
 				$this->results['lastUpdated'] = $result['lastUpdated'];
@@ -255,7 +258,12 @@ class content {
 		// 2, Get the page paths for the node  -- TO DO will language be an issue here?
 		$this->getPagePaths($nodeID, $languageID);
 			
-		// 3. Now get the data
+
+		// 3, Get the page paths for the node  -- TO DO will language be an issue here?
+		$this->getNodeDependencies($nodeID);
+				
+
+		// 4. Now get the data
   		try {
 			$db =  self::$db;
 			
@@ -384,7 +392,6 @@ class content {
 	}
 
 
-	
 	function saveContent($nodeID, $languageID, $notes, $noCache, $entityArray, $sectionInstances) 
   	{
 		// Returned by the insert - TODO remove?
@@ -394,7 +401,6 @@ class content {
 		$userID = $_SESSION['userID'];
 				
 		// Stores the content to the DB
-		// TO DO store the old version to the version tables. 
 		
 		$db =  DBCxn::Get();
 	
@@ -518,7 +524,7 @@ class content {
 			$nodeArray = array();
 			$mediaArray = array();
 			
-			// used to store any nodes that will need to be pulled back in the content (e.g. refed in the content pickers)
+			// used to store any nodes that will need to be pulled back in the content (e.g. referenced in the content pickers)
 			$nodeDependencyArray = array();
 			
 			foreach ($entityArray as $key => $value) {
@@ -779,7 +785,6 @@ class content {
 		$db = null;
 		
 		// update the dependencies table
-		// TO DO updateDependencies($nodeID)
 		$this->updateDependencies($nodeID, $nodeDependencyArray);
 
 		// clear all cache files on publish - quick and dirty
@@ -801,11 +806,12 @@ class content {
 		}
 	}
 	
-	
+	/* // This function is not used in the system - it's here as this legacy test logic will be used 
+	// to add the copy function in a forthcoming release
 	function copyNodeTest($nodeID, $languageID) 
   	{
 		// TO DO think about where this node goes $targetParent node or some such
-
+		
 		$contentID = 0;
 		$newNodeID = 0;
 		
@@ -986,7 +992,7 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 				$query->execute();
 				
 				
-	/*		// 4.1 // entity_value_int 
+	/ *		// 4.1 // entity_value_int 
 			foreach ($intArray as $key => $value) {
 			//	error_log("key = " . $key . " - " . $value);
 				$query = $db->prepare("INSERT INTO cms_entity_value_int (entityID, contentID, value) 
@@ -1034,7 +1040,7 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 				$query->execute();
 			} 
 		
-		*/
+		* /
 			$db->commit();
 /// $db->rollBack();
 		}
@@ -1055,7 +1061,7 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 	//	$this->updateDependencies($newNodeID, $nodeDependencyArray);
 		return true;	
 	}
-	
+	*/
 	
 	function setTemplate($nodeID, $templateID, $languageID)
 	{
@@ -1196,31 +1202,36 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 	}
 	
 	
-	function checkPagePath($nodeID, $path) 
+	function checkPagePath($nodeID, $type, $path) 
 	{
 		// Create the page path doesn't already exist in the DB
 		$path = strtolower(trim(($path)));
 		$db =  DBCxn::Get();
 		try 
 		{			
-			$query = $db->prepare("SELECT p.nodeID AS nodeID, n.nm AS nodeName
-									FROM `cms_page_path` AS p
-									LEFT OUTER JOIN cms_tree_data n ON n.id = p.nodeID
-									WHERE p.nodeID != :nodeID AND path = :path;");
-									
-			$query->bindParam(':path', $path, PDO::PARAM_STR);
+			$query = $db->prepare("SELECT p.nodeID AS nodeID
+									FROM `cms_page_path` AS p	
+									WHERE p.nodeID = :nodeID AND type = :type AND path = :path;");
+
 			$query->bindParam(':nodeID', $nodeID, PDO::PARAM_INT);
-			
+			$query->bindParam(':type', $type, PDO::PARAM_INT);			
+			$query->bindParam(':path', $path, PDO::PARAM_STR);
+
+			error_log("nodeID = $nodeID , type = $type , path = $path");
 			$query->execute(); 
 			
+			error_log($query->rowCount());
 			// If we have a row
 			if($query->rowCount() != 0) {
-				$result = $query->fetch();
-				$nodeID = $result['nodeID'];
-				$nodeName = $result['nodeName'];
+			//	$result = $query->fetch();
+			//	$nodeID = $result['nodeID'];
+			//	$nodeName = $result['nodeName'];
 			//	error_log($nodeName . ' - ' . $nodeID);
-				return $nodeName . ' - ' . $nodeID;
+			//	return $nodeName . ' - ' . $nodeID;
+				error_log("returning true");
+				return true;
 			} else {
+				error_log("returning false");
 				return false;
 			}
 			
@@ -1239,15 +1250,15 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 		return false;
 	}
 		
+		
 	function addPagePath($nodeID, $type, $path) 
 	{
-		// Create the template in the DB
-		// TO DO store the old version to the version tables. 
+		// Adds page path to the DB 
 		$path = strtolower(trim(($path)));
 		
 		$db =  DBCxn::Get();
 		
-		if ($type !== 1 && $type !== 2 && $type !== 3)
+		if ($type !== 1 && $type !== 2 && $type !== 3 && $type !== 100)
 		{
 			$type = 1;
 		}
@@ -1338,6 +1349,166 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 		return true;
 	}
 	
+	
+	function checkNodeDependency($nodeID, $subnodeID, $level) 
+	{
+		// Create the node dependency doesn't already exist in the DB
+		$db =  DBCxn::Get();
+		try 
+		{			
+			$query = $db->prepare("SELECT nodeID
+									FROM `cms_node_dependency` AS nd
+									
+									WHERE nodeID = :nodeID AND subnodeID = :subnodeID AND level = :level;");
+									
+
+			$query->bindParam(':nodeID', $nodeID, PDO::PARAM_INT);
+			$query->bindParam(':subnodeID', $subnodeID, PDO::PARAM_INT);
+			$query->bindParam(':level', $level, PDO::PARAM_INT);
+			
+			$query->execute(); 
+			
+			// If we have a row
+			if($query->rowCount() != 0) {
+				$result = $query->fetch();
+				$nodeID = $result['nodeID'];
+				return $nodeID;
+			} else {
+				return false;
+			}
+			
+			// close the connection
+			$db = null;
+		}
+		catch (PDOException $e)
+		{
+			error_log("Check node dependency failed.\n");
+			error_log("getCode: ". $e->getCode() . "\n");
+			error_log("getMessage: ". $e->getMessage() . "\n");
+			$db = null;
+			return false;
+		}
+	
+		return false;
+	}
+	
+	
+	function addNodeDependency($nodeID, $subnodeID, $level) 
+	{
+		$db =  DBCxn::Get();
+		
+	//	if ($level !== null && $level !== 0)
+	//	{
+	//		$level = 1;
+	//	}
+		
+		// TO DO Validate that the user has access to this node? 
+		try 
+		{			
+			$query = $db->prepare("INSERT INTO cms_node_dependency (`nodeID`, subnodeID, `level`)
+									VALUES (:nodeID, :subnodeID, :level);");
+			$query->bindParam(':nodeID', $nodeID, PDO::PARAM_INT);
+			$query->bindParam(':subnodeID', $subnodeID, PDO::PARAM_INT);
+			$query->bindParam(':level', $level, PDO::PARAM_INT);
+			$query->execute(); 
+			$nodeDependencyID = $db->lastInsertId(); 
+			
+			// close the connection
+			$db = null;
+		}
+		catch (PDOException $e)
+		{
+			error_log("Insert node dependency failed.\n");
+			error_log("getCode: ". $e->getCode() . "\n");
+			error_log("getMessage: ". $e->getMessage() . "\n");
+			$db = null;
+			return false;
+		}
+	
+		return $nodeDependencyID;
+	}
+	
+	
+	function deleteNodeDependency($nodeDependencyID) 
+	{
+		// deletes path
+		$nodeDependencyID = strtolower(trim(($nodeDependencyID)));
+		
+		$db =  DBCxn::Get();
+		
+		// TO DO Validate that the user has access to this node? 
+		try 
+		{			
+			$query = $db->prepare("DELETE FROM cms_node_dependency 
+									WHERE ID = :nodeDependencyID;");
+			$query->bindParam(':nodeDependencyID', $nodeDependencyID, PDO::PARAM_INT);
+			$query->execute(); 
+			// close the connection
+			$db = null;
+		}
+		catch (PDOException $e)
+		{
+			error_log("Delete node dependency failed.\n");
+			error_log("getCode: ". $e->getCode() . "\n");
+			error_log("getMessage: ". $e->getMessage() . "\n");
+			$db = null;
+			return false;
+		}
+	
+		return true;
+	}
+	
+	
+	function getNodeDependencies($nodeID)
+	{
+		// TO DO - would I need languageID here if we add that back?
+		try {
+			$db =  self::$db;
+			
+			$sql = "SELECT np.`ID`, np.`nodeID`, np.`subnodeID`, np.`level`, td.nm AS nodeName
+					FROM cms_node_dependency AS np
+					  INNER JOIN cms_tree_data AS td ON td.id = np.subnodeID
+						WHERE np.nodeID = :nodeID 
+						ORDER BY np.ID DESC
+					;";
+			
+			$query = $db->prepare($sql);
+			$query->bindParam(':nodeID', $nodeID, PDO::PARAM_INT);
+		//	$query->bindParam(':languageID', $languageID, PDO::PARAM_INT);
+			$query->execute();
+		
+			// If we have a row
+			$nodedependency = [];
+			$this->results['nodedepenencies'] = $nodedependency;
+			
+			if($query->rowCount() != 0) {
+				foreach ($query as $key => $result) {
+				//	$ID = $result['ID'];
+					$nodedependency = [];
+					$nodedependency['nodeDependencyID'] = $result['ID'];
+					$nodedependency['nodeName'] = $result['nodeName'];
+					$nodedependency['subnodeID'] = $result['subnodeID'];
+					$nodedependency['level'] = $result['level'];
+//					$nodedependency['type'] = $result['type'];
+					
+					$this->results['nodedepenencies'][] = $nodedependency;
+				}	
+			} 
+		}
+		catch (Exception $e) 
+		{
+			error_log('Throwing exception in the getContent for getting node dependecies');
+			error_log('Node ID - ' . $nodeID . ' has thrown exception in part 4 of the get content details ' . $e->getMessage());
+			return false;
+		}
+		
+		return true;
+
+			
+		
+	}
+	
+	
 	function updateDependencies($nodeID, $npDependencies) 
 	{
 		// updates the dependencies tables for other nodes that need to know about this one and creates a list of the nodes this node needs to know about.
@@ -1395,7 +1566,7 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 				error_log('Error getting parent for: nodeID = ' . $nodeID);
 			}  */
 	
-		// Now for each parent check if either the specific level is needed or if all levels are of interest and add them to the depenency list
+		// Now for each parent check if either node at a specific level is needed or if all desecendats (levels) are of interest and add them to the depenency list
 		foreach($nodeParents as $key => $value) {
 			$sql = "SELECT nodeID, level 
 					FROM cms_node_dependency
@@ -1411,6 +1582,7 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 				$result = $query->fetch();
 				$relatedNode['nodeID'] = $result['nodeID']; 
 				$relatedNode['level'] = $result['level']; 
+				$relatedNode['relativeLevel'] = $key;  // parents = 1 grandparents = 2 (away)	
 				
 				array_push($otherNodeDeps, $relatedNode);
 			} else {
@@ -1444,7 +1616,7 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 		while ($startofstr !== false);
 		
 		// 2b Child
-		// TO DO - need to think about .Level(2)  or if this is absent then all?
+		// TO DO - need to think about .Level(2) - e.g. descendants or if this is absent then all?
 		// @ContentByNodeID(27, 'NoExist')
 		$startPos  = 0;
 
@@ -1456,7 +1628,7 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 			$bracketpos =  strpos($templateCode, '(', $startofstr);
 			$endofstr = strpos($templateCode, ')', $startofstr);
 
-			// TO DO remove this as it's a hardcode - if we find @Page.Children we just enter an all levels dependecy record for now
+			// TO DO remove this as it's a hardcode - if we find @Page.Children we just enter an all levels dependency record for now
 			$insertChildDependency = true;
 		}
 
@@ -1466,7 +1638,7 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 		$db->beginTransaction();
 		
 		// 3.b  Delete all dependencies where this node is the primary (e.g. we recreate this list in case some have been removed by template change or picker changes?)
-		// TO DO - this would also mean we can remoce the duplicate check in 3.c
+		// TO DO - this would also mean we can remove the duplicate check in 3.c
 		
 		// 3.c  Insert all new dependencies for this node.
 		foreach($thisNodeDeps as $key => $value) 
@@ -1495,11 +1667,11 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 		{
 			$query = $db->prepare("SELECT nodeID, subnodeID, level
 									FROM cms_node_dependency 
-									WHERE nodeID =:nodeID AND subnodeID = :subnodeID
+									WHERE nodeID =:nodeID AND subnodeID = :subnodeID AND level = :level
 									;");
 			$query->bindParam(':nodeID', $value['nodeID'], PDO::PARAM_INT);
 			$query->bindParam(':subnodeID', $nodeID, PDO::PARAM_INT);  // the subnode is the nodeID of this node.. confusing!
-		//	$query->bindParam(':level', $value['level'], PDO::PARAM_INT);
+			$query->bindParam(':level', $relatedNode['relativeLevel'], PDO::PARAM_INT);
 			$query->execute();
 			
 			// if we don't have a row insert one!
@@ -1509,7 +1681,8 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 										;");
 				$query->bindParam(':nodeID', $value['nodeID'], PDO::PARAM_INT);
 				$query->bindParam(':subnodeID', $nodeID, PDO::PARAM_INT);  // the subnode is the nodeID of this node.. confusing!
-				$level = $key +1;
+				// $level = $key +1;
+				$level = $relatedNode['relativeLevel'];
 				$query->bindParam(':level', $level, PDO::PARAM_INT);
 				$query->execute();
 			}
@@ -1541,7 +1714,8 @@ must be an ABC sampling week or something MT @suttonnick: Monday\'s Sun front pa
 		// 3.d  Complete the trans
 		$db->commit();
 		
-		// DIRTY CACHE - this node and any other one that references it! 
+		// TODO DIRTY CACHE - this node and any other one that references it! 
+		// ATM the entire cache is wiped out on any publish but if this is changed then we should dirty the cache for each dependency here.
 		
 		// close the conn
 		$db = null;

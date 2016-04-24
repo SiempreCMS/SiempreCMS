@@ -571,15 +571,15 @@ nav ul li.active a {
 	padding: 20px 10px;
 }
 
-.content-pagepaths {
+.content-pagepaths, .content-node-dependencies {
 	width: 400px;
 }
 
-.content-pagepaths li {
+.content-pagepaths li, .content-node-dependencies li {
 	min-height: 45px;
 }
 
-.content-pagepath-delete {
+.content-pagepath-delete, .content-node-dependency-delete {
 	float: right;
 }
 

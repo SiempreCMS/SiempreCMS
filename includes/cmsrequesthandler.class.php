@@ -88,83 +88,8 @@ class CMSRequestHandler {
 		switch($cms->pageType)
 		{
 			case 'notfound':
-				// TO DO load this from a text file (not using the db for added safety)
-				$fourohfour = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">  
-					<html>  
-					  <head>  
-						<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>  
-						<title>404 - Page not found</title>  
-						<style>
-							body { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABZ0RVh0Q3JlYXRpb24gVGltZQAxMC8yOS8xMiKqq3kAAAAcdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzVxteM2AAABHklEQVRIib2Vyw6EIAxFW5idr///Qx9sfG3pLEyJ3tAwi5EmBqRo7vHawiEEERHS6x7MTMxMVv6+z3tPMUYSkfTM/R0fEaG2bbMv+Gc4nZzn+dN4HAcREa3r+hi3bcuu68jLskhVIlW073tWaYlQ9+F9IpqmSfq+fwskhdO/AwmUTJXrOuaRQNeRkOd5lq7rXmS5InmERKoER/QMvUAPlZDHcZRhGN4CSeGY+aHMqgcks5RrHv/eeh455x5KrMq2yHQdibDO6ncG/KZWL7M8xDyS1/MIO0NJqdULLS81X6/X6aR0nqBSJcPeZnlZrzN477NKURn2Nus8sjzmEII0TfMiyxUuxphVWjpJkbx0btUnshRihVv70Bv8ItXq6Asoi/ZiCbU6YgAAAABJRU5ErkJggg==);}
-							.error-template {padding: 40px 15px;text-align: center;}
-							.error-actions {margin-top:15px;margin-bottom:15px;}
-							.error-actions .btn { margin-right:10px; }
-							.homelink {
-								width: 150px;
-								margin: 0 auto;
-							}
-							.homelink p{
-								position: relative;
-								top: -41px;
-								left: 26px;
-							}
-							.homelink a {
-								font-weight: 600;
-								font-size: 16px;
-								text-decoration: none;
-							}
-							.home {
-								font-size: 9px;
-								height: 1em;
-								width: 0.5em;
-								margin-top: 1em;
-								margin-left: -1em;
-								border-bottom: none;
-								border-right: 1.5em solid #2C2C2C;
-								border-left: 1.5em solid #2C2C2C;
-								border-top: 1.4em solid #2C2C2C;
-								position: relative;
-								}
-
-								.home::before {
-								border-left: 2.4em solid transparent;
-								position: absolute;
-								content: "";
-								top: -2.8em;
-								right: -2.1em;
-								width: 0em;
-								height: 0em;
-								border-right: 2.4em solid transparent;
-								border-bottom: 1.5em solid #2C2C2C;
-							}
-						</style>
-					  </head>  
-					  <body>  
-						<div class="container">
-							<div class="row">
-								<div class="col-md-12">
-									<div class="error-template">
-										<h1>
-											Oops!</h1>
-										<h2>
-											404 Not Found</h2>
-										<div class="error-details">
-											Sorry, an error has occured, Requested page not found!
-										</div>
-										<div class="error-actions">
-										<br />
-											<div class="homelink">
-												<a href="/"><div class="home"></div>
-												<p>Take Me Home</p></a>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					  </body>  
-					</html>'; 
-					
+				// Gets the 404 from a text file (not using a CMS node for added safety ? - Perhaps this needs changing)
+				$fourohfour = file_get_contents('fourohfour.html', true); 	
 				RestUtils::sendResponse(404, $fourohfour, 'text/html');
 				break;
 				
@@ -197,7 +122,13 @@ class CMSRequestHandler {
 			// normal pages assumed!
 			default:
 				// get the data and build the page 
-				$cms->getPage($this->pathArray);
+				// if getPage returns false it's a new page not yet published - 404 instead of error
+				if(!$cms->getPage($this->pathArray, $this->requestVars))
+				{
+					// Gets the 404 from a text file (not using a CMS node for added safety ? - Perhaps this needs changing)
+					$fourohfour = file_get_contents('fourohfour.html', true); 	
+					RestUtils::sendResponse(404, $fourohfour, 'text/html');
+				}
 				
 				$debug = false;		
 				if(isset($this->requestVars['debug']) && DEBUG) {

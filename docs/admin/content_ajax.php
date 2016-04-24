@@ -216,7 +216,7 @@ if (isset($_POST['action'])) {
 			//&&is_int((int)$_POST['languageID'])
 			) {		
 			
-			$exists = $content->checkPagePath((int)$_POST['nodeID'], $_POST['path']);
+			$exists = $content->checkPagePath((int)$_POST['nodeID'], (int)$_POST['type'], $_POST['path']);
 			if ($exists == false) {
 			
 				$pagePathID = $content->addPagePath((int)$_POST['nodeID'], (int)$_POST['type'], $_POST['path'] /*,(int)$_POST['languageID']*/);
@@ -274,11 +274,74 @@ if (isset($_POST['action'])) {
 			
 			$result = $content->deletePagePath((int)$_POST['pathID']);
 			if($result == 0) {
-				echo(json_encode(array('result' => false, 'msg' => 'Error deleting page path to the database')));
+				echo(json_encode(array('result' => false, 'msg' => 'Error deleting page path from the database')));
 				exit();
 			}
 			else {
 				echo(json_encode(array('result' => $result, 'msg' => 'Page Path deleted')));
+				exit();
+			}
+			
+		}
+		else {
+			echo(json_encode(array('result' => false, 'msg' => 'AJAX Validation failed')));
+			exit();
+		}
+	}
+	
+	////////////////////////////////////////////////////
+	// addNodeDependency - adds a node dependency
+	////////////////////////////////////////////////////		
+	if ($_POST['action'] == 'addNodeDependency' ) {
+		if(isset($_POST['nodeID'])
+			&&is_int((int)$_POST['nodeID'])
+			&&isset($_POST['dependencyID'])
+			&&is_int((int)$_POST['dependencyID'])
+			&&isset($_POST['level'])
+			&&(strlen($_POST['level'])>0)
+			//&&isset($_POST['languageID'])
+			//&&is_int((int)$_POST['languageID'])
+			) {		
+			
+			$exists = $content->checkNodeDependency((int)$_POST['nodeID'], (int)$_POST['dependencyID'], (int)$_POST['level']);
+			if ($exists == false) {
+			
+				$nodeDependencyID = $content->addNodeDependency((int)$_POST['nodeID'], (int)$_POST['dependencyID'], $_POST['level'] /*,(int)$_POST['languageID']*/);
+				
+				if($nodeDependencyID == 0) {
+					echo(json_encode(array('result' => false, 'msg' => 'Error adding node dependency to the database')));
+					exit();
+				}
+				else {
+					echo(json_encode(array('result' => $nodeDependencyID, 'msg' => 'Node Dependency added')));
+					exit();
+				}
+			} else {
+				echo(json_encode(array('result' => false, 'msg' => 'Node Dependency already exists - ' . $exists)));
+				exit();
+			}
+		}
+		else {
+			echo(json_encode(array('result' => false, 'msg' => 'AJAX Validation failed')));
+			exit();
+		}
+	}
+	
+	
+	////////////////////////////////////////////////////
+	// deleteNodeDependency - deletes a node dependency
+	////////////////////////////////////////////////////		
+	if ($_POST['action'] == 'deleteNodeDependency' ) {
+		if(isset($_POST['nodeDependencyID'])
+			&&is_int((int)$_POST['nodeDependencyID'])) {		
+			
+			$result = $content->deleteNodeDependency((int)$_POST['nodeDependencyID']);
+			if($result == 0) {
+				echo(json_encode(array('result' => false, 'msg' => 'Error deleting node dependency from the database')));
+				exit();
+			}
+			else {
+				echo(json_encode(array('result' => $result, 'msg' => 'Node Dependency deleted')));
 				exit();
 			}
 			
@@ -328,7 +391,7 @@ if (isset($_POST['action'])) {
 			{		
 			
 			// first check we're not about to create a duplicate
-			$result = $content->checkPagePath((int)$_POST['nodeID'], $_POST['path']);
+			$result = $content->checkPagePath((int)$_POST['nodeID'], 0, $_POST['path']);
 			
 			if($result === false) {
 				$result = $content->setPrimaryPagePath((int)$_POST['nodeID'], $_POST['path'] /*,(int)$_POST['languageID']*/);

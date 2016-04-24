@@ -266,8 +266,28 @@ if(isset($_GET['operation'])) {
 				<option value="2">301 Redirect</option>
 				<option value="3">302 Redirect</option>
 				<option value="1">Alias</option>
+				<option value="100">Wildcard</option>
 			</select>
 			<a href="#" class="button green" id="content-pagepath-add" name="content-pagepath-add"><span class="icon-add"></span> Add page path</a>
+		</div>  
+		<!-- End of Page Paths Dialog -->  
+		
+		
+		
+		<!-- Start of Node Dependencies Dialog -->  
+		<div id="node-dependencies-dialog" title="Siempre CMS - Edit Node Dependencies" style="display: none;" class="help"> 	
+			<h3>Node Dependencies</h3>
+			<p>These are the nodes that the content is accessible from for the template code or ajax.</p>
+			<p>For example for a news parent page you might have all child nodes set as a dependency. </p>
+			<div>
+				<ul id="content-node-dependencies" class="content-node-dependencies"></ul>
+			</div>
+			<p class="note">Add a new node dependency</p> 	
+			<input type="text" id="content-node-dependency-new" class="node-dependency" name="content-nodedependency-new" data-id=""/>
+			<label><input id="content-node-dependency-new-all-children" class="entity-checkbox" type="checkbox"/> All children?</label>
+			
+			<a href="#" class="button green" id="node-dependency-linkpicker-select"><span class="icon-action"></span> Select a content node</a>
+			<a href="#" class="button green" id="content-node-dependencies-add" name="content-node-dependency-add"><span class="icon-add"></span> Add node dependency</a>
 		</div>  
 		<!-- End of Page Paths Dialog -->  
 		
@@ -426,7 +446,22 @@ if(isset($_GET['operation'])) {
 												</ul>
 											</div>
 										</div>
-										<a href="#" class="button green" id="pagepaths"><span class="icon-publish"></span> Change</a>
+										<a href="#" class="button green" id="pagepaths-change"><span class="icon-publish"></span> Change</a>
+									</div>
+									
+									<div id="node-dependencies-container" class="node-dependencies-container">
+										<h3>Related Content Nodes</h3>
+										<div class="entity clearfix">
+											<div class="entity-info"> 
+												<h3>Nodes</h3>
+											</div>
+											<div class="entity-data">
+												<ul id="node-dependencies">
+													<li>none</li>
+												</ul>
+											</div>
+										</div>
+										<a href="#" class="button green" id="node-dependencies-change"><span class="icon-publish"></span> Change</a>
 									</div>
 								</div>
 							</div> <!-- EOF content_tabs_container -->
