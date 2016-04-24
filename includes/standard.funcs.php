@@ -181,24 +181,34 @@ function trim_lines( $str , $what = NULL , $with = ' ' )
     return trim( preg_replace( "/[".$what."]+/" , $with , $str ) , $what );
 }
 
-function in_multiarray($elem, $array, $field)
+function pos_in_multiarray($elem, $array, $field)
 {
     $top = sizeof($array) - 1;
     $bottom = 0;
 	$count = 0;
     while($bottom <= $top)
     {
-        if($array[$bottom][$field] == $elem)
-            return $count;
+		$curElem = $array[$bottom][$field];
+        if(trim($array[$bottom][$field]) == trim($elem))
+		{
+			return $count;
+		}
+
         else 
+		{
             if(is_array($array[$bottom][$field]))
-                if(in_multiarray($elem, ($array[$bottom][$field])))
-                    return true;
+			{
+                if(pos_in_multiarray($elem, ($array[$bottom][$field])))
+				{
+                    return $count;
+				}
+			}
+		}
 
         $bottom++;
 		$count++;
     }        
-    return false;
+    return -1;
 }
 
 ?>

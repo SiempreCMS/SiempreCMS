@@ -12,7 +12,6 @@
 
 
 class FieldHelper {
-/* TO DO TO DO - just copied and pasted the old generic FieldHelper */
 /* class to validate and check fields.. TO DO have a good think about the structure of this 
    for example modifiers are handled in the foreach but this might be more generic and better placed here?
 */
@@ -29,7 +28,6 @@ class FieldHelper {
 		// keyword is up to first bracket
 		$this->keyword = trim(substr($fieldTemplate, 0, strpos($fieldTemplate, '(')));
 				
-	//	$this->fieldContent = "[[CONTENT FROM FIELDHELPER]]";
 		switch($this->keyword) {
 			case '@ContentByNodeID':
 				$this->fieldContent = "**TODO@ContentByNodeID**";
@@ -66,7 +64,6 @@ class FieldHelper {
 				
 				break;
 			case '@foreach':
-				$this->fieldContent = "**TODO@foreach**";
 				$foreachHelper = new ForEachHelper($this->content, $fieldTemplate);
 				if ($foreachHelper->valid) {
 					// ask the module helper for the content. 
@@ -261,9 +258,6 @@ class ForEachHelper {
 			case "Children":
 				// now count the children - TO DO this will be more complicated with filters and sort orders and limits (e.g. first 5 ) @item.SomeField.Where('someethingisTrue');
 				$numChildren = 0;
-
-				// for each piece of related content.. 
-				//error_log("RELATED COUNT = " . count($this->content->relatedContent));
 				
 				// as per sections below - copy and paste - TODO refactor
 				if (isset($content->variables[$this->varName])) {
@@ -271,16 +265,18 @@ class ForEachHelper {
 					$this->fieldContent = "Variable name error - already exists";
 				} else {
 					$this->content->variables[$this->varName]['type'] = "child";
-				//	$this->content->variables[$this->varName]['childID'] = $this->sectionID;
 				}
 				
 				
 				if (isset($this->content->relatedContent) && count($this->content->relatedContent) > 0) {
-					$sortByPos = in_multiarray("SortBy", $this->collection, "item");
+					$sortByPos = pos_in_multiarray("SortBy", $this->collection, "item");
+					$paginationPos = pos_in_multiarray("Pagination", $this->collection, "item");
+					// error_log(print_r($this->collection,1));
 					$relatedContent = $this->content->relatedContent;
 					// error_log(print_r($relatedContent,1));
 //					error_log("FIRST: ". $this->content->relatedContent[0]['lastUpdatedDate']);
 					
+					// if sortByPos has been found in the template function collection
 					if($sortByPos >= 0) {
 						// sort!
 						$sortStr = $this->collection[$sortByPos]["options"];
@@ -307,18 +303,56 @@ class ForEachHelper {
 						usort($relatedContent, content_sorter($meta));
 					}
 					
-					foreach($relatedContent as $child)
-					{ 
-						// TO DO more matching if we us .Where('something is true');
-						// Check if it's a child
-						if ($child['level'] > 0) {
-							$numChildren++;
-			
-							// set the current child node ID 
-							$this->content->variables[$this->varName]['childID'] = $child['nodeID'];
-							
-							// Now get the CMS helper to parse the loop content. 
-							$loopOutput .= $this->content->parseTemplate($this->loopContent);
+					// if pagination is found then we do pagination!
+					if($paginationPos >= 0) {
+						$pageNum = 1;
+						// get name of the page url variable
+						$pageVar = $this->collection[$paginationPos]["options"];
+						if(isset($content->requestVars[$pageVar]) && is_numeric($content->requestVars[$pageVar]) && $content->requestVars[$pageVar] > 0)
+						{
+							$pageNum = $content->requestVars[$pageVar];
+						}
+						
+						// list requested page worth of results
+						$count = 0;
+						$itemsPerPage = 3;
+						$lowerLimit = ($pageNum -1) * $itemsPerPage;
+						$upperLimit = $pageNum * $itemsPerPage;
+												
+						foreach($relatedContent as $child)
+						{ 
+							// TO DO more matching if we us .Where('something is true');
+							// Check if it's a child
+							if ($child['level'] == 1) {
+								$numChildren++;
+				
+								if($count >= $lowerLimit && $count < $upperLimit) 
+								{
+									// set the current child node ID 
+									$this->content->variables[$this->varName]['childID'] = $child['nodeID'];
+									// Now get the CMS helper to parse the loop content. 
+									$loopOutput .= $this->content->parseTemplate($this->loopContent);
+								}
+								$count++;
+							}
+						}
+						// now add the pagination controls
+						$loopOutput .= $this->CreatePaginationLinks($pageNum, $numChildren, $itemsPerPage, "/".$content->pagePath. "/", $pageVar);
+					}
+					else {
+						// List all
+						foreach($relatedContent as $child)
+						{ 
+							// TO DO more matching if we us .Where('something is true');
+							// Check if it's a child
+							if ($child['level'] == 1) {
+								$numChildren++;
+				
+								// set the current child node ID 
+								$this->content->variables[$this->varName]['childID'] = $child['nodeID'];
+								// Now get the CMS helper to parse the loop content. 
+								$loopOutput .= $this->content->parseTemplate($this->loopContent);
+							}
 						}
 					}
 				}
@@ -408,20 +442,23 @@ class ForEachHelper {
 				if ($collectionStr[$i] == ')') {
 					$openBrackets--;
 				} 
-				
-				// todo escape str?
-				if ($collectionStr[$i] == '"') { 
-					$strMode = !$strMode;
-				}
+			
 				if ($collectionStr[$i] == '.') {
 					// found a collection item - add to the array and blank out the outputstr
-					array_push($collection, array("item" => $collectionNameStr, 
-													"options" => $collectionOptionsStr));
+					//error_log("item => $collectionNameStr ,options => $collectionOptionsStr");
+					array_push($collection, array("item" => trim($collectionNameStr), 
+													"options" => trim($collectionOptionsStr, '"')));
 					$collectionNameStr = '';
 					$collectionOptionsStr = '';
 					continue;
 				}
 			}
+			
+			// todo escape str?
+			if ($collectionStr[$i] == '"') { 
+				$strMode = !$strMode;
+			}
+			
 			if ($openBrackets > 0 || $collectionStr[$i] == ')')  {
 				// dirty hack for now
 				if ($collectionStr[$i] != "(" && $collectionStr[$i] != ")" && $collectionStr[$i] != "'" && $collectionStr[$i] != "'")
@@ -429,12 +466,61 @@ class ForEachHelper {
 			} else {
 				$collectionNameStr = $collectionNameStr . $collectionStr[$i];
 			}
+			
+			if($openBrackets == 0 && !$strMode && ( $collectionStr[$i] == ' ' || $collectionStr[$i] == "\r"|| $collectionStr[$i] == "\n"))
+			{
+				break; // we've hit the end of the start of the function
+			}
 		}
 		// push last one
+		//error_log("item => $collectionNameStr ,options => $collectionOptionsStr");
 		array_push($collection, array("item" => $collectionNameStr, 
-													"options" => $collectionOptionsStr));
+													"options" => trim($collectionOptionsStr, '"')));
 													
 		return ($collection);
+	}
+	
+	function CreatePaginationLinks($curPage, $numItems, $itemsPerPage, $url, $pageVar)
+	{
+		// TO DO - limit the number of pages?
+		$numPages = ceil($numItems / $itemsPerPage);
+		$output = '<div class="pagination-cont"><ul class="pagination">';
+		
+		// prev link
+		if($curPage > 1) 
+		{
+			$output .= '<li><a href="'.$url.'?'.$pageVar.'='.($curPage -1).'">prev</a></li>';
+		}
+		else 
+		{
+			$output .= '<li class="disabled">prev</li>';
+		}
+		
+		// output the pages
+		for($i = 1; $i <= $numPages; $i++)
+		{
+			if($curPage == $i)
+			{
+				$output .= '<li class="active">'. $i . '</li>';
+			}
+			else 
+			{
+				$output .= '<li><a href="'.$url.'?'.$pageVar.'='.$i.'">'. $i . '</a></li>';
+			}
+		}	  
+		
+		// next link
+		if($curPage < $numPages) {
+			$output .= '<li><a href="'.$url.'?'.$pageVar.'='.($curPage +1).'">next</a></li>';
+		}	
+		else 
+		{
+			$output .= '<li class="disabled">next</li>';
+		}
+			  
+		$output .= '.</ul></div>';
+		
+		return $output;
 	}
 }
 
