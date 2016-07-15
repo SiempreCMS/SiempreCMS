@@ -372,17 +372,19 @@ class ForEachHelper {
 					$this->content->variables[$this->varName]['sectionID'] = $this->sectionID;
 				}
 					
-					
-				foreach($this->content->sections[$this->sectionID]['sectionInstances'] as $section) {
-					$childOutput = '';
-					$lastChildPos = 0;
-					
-					// for each section Instance update the @section variable in the content variable with the current instance 
-					$this->content->variables[$this->varName]['type'] = 'section';
-					$this->content->variables[$this->varName]['sectionInstanceID'] = $section;
+				if(isset($this->content->sections[$this->sectionID]))
+				{					
+					foreach($this->content->sections[$this->sectionID]['sectionInstances'] as $section) {
+						$childOutput = '';
+						$lastChildPos = 0;
+						
+						// for each section Instance update the @section variable in the content variable with the current instance 
+						$this->content->variables[$this->varName]['type'] = 'section';
+						$this->content->variables[$this->varName]['sectionInstanceID'] = $section;
 
-					// Now get the CMS helper to parse the loop content. 
-					$loopOutput .= $this->content->parseTemplate($this->loopContent);
+						// Now get the CMS helper to parse the loop content. 
+						$loopOutput .= $this->content->parseTemplate($this->loopContent);
+					}
 				}
 				// finally kill the variable in case it's reused in a future loop
 				unset($this->content->variables[$this->varName]);
